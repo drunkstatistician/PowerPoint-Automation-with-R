@@ -1,0 +1,173 @@
+##Script to automate Powerpoint
+
+library(Quandl)
+gdp = head(Quandl("FRED/GDP"),8)
+houst = head(Quandl("FRED/HOUST"),8)
+fx = head(Quandl("FRED/EXUSEU"),8)
+cpi = head(Quandl("FRED/CPIAUCSL"),8)
+
+
+library(ggplot2)
+library(ggthemes)
+
+#GDP
+gdp_plot <- ggplot(data=gdp, aes(x=Date, y=Value)) +
+  geom_bar(stat="identity", position=position_dodge(width = 1), colour="black") +
+  scale_fill_manual(values=c("#C0C0C0", "#87CEEB")) +
+  ggtitle("GDP Annual Rate") + 
+  theme_minimal() + 
+  geom_text(aes(label=Value),hjust=0.5, vjust=-.5, position=position_dodge(width = 1), 
+            size=2.5) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(legend.title=element_blank()) +
+  theme(axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank())
+
+
+#Housing Starts
+houst_plot <- ggplot(data=houst, aes(x=Date, y=Value)) +
+  geom_bar(stat="identity", position=position_dodge(width = 1), colour="black") +
+  scale_fill_manual(values=c("#C0C0C0", "#87CEEB")) +
+  ggtitle("Housing Starts") + 
+  theme_minimal() + 
+  geom_text(aes(label=Value),hjust=0.5, vjust=-.5, position=position_dodge(width = 1), 
+            size=2.5) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(legend.title=element_blank()) +
+  theme(axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank())
+
+
+
+#USD/Euro
+fx_plot <- ggplot(data=fx, aes(x=Date, y=Value)) +
+  geom_bar(stat="identity", position=position_dodge(width = 1), colour="black") +
+  scale_fill_manual(values=c("#C0C0C0", "#87CEEB")) +
+  ggtitle("USD/Euro") + 
+  theme_minimal() + 
+  geom_text(aes(label=Value),hjust=0.5, vjust=-.5, position=position_dodge(width = 1), 
+            size=2.5) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(legend.title=element_blank()) +
+  theme(axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank())
+
+#Consumer Price Index
+cpi_plot <- ggplot(data=cpi, aes(x=Date, y=Value)) +
+  geom_bar(stat="identity", position=position_dodge(width = 1), colour="black") +
+  scale_fill_manual(values=c("#C0C0C0", "#87CEEB")) +
+  ggtitle("Consumer Price Index") + 
+  theme_minimal() + 
+  geom_text(aes(label=Value),hjust=0.5, vjust=-.5, position=position_dodge(width = 1), 
+            size=2.5) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(legend.title=element_blank()) +
+  theme(axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank())
+
+
+##Multiplot Function, sourced from http://www.peterhaschke.com/r/2013/04/24/MultiPlot.html
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+
+##BEGIN POWERPOINT SLIDE INPUTS############################################
+library(ReporteRs)
+library(ReporteRsjars)
+library(magrittr)
+
+mydoc <- pptx(template = 'C:/Users/Jeff/Desktop/ppt_auto/template.pptx') 
+
+date <- Sys.Date()
+
+options( "ReporteRs-fontsize" = 12 )
+# Create a FlexTable with data.frame Economy, display rownames
+# use different formatting properties for header and body cells
+packs <- list("ReporteRs","scales")
+lapply(packs,require,character.only = TRUE)
+
+# slide1: Title ------------------
+mydoc <- mydoc %>% 
+  addSlide( slide.layout = "Title Slide" ) %>% 
+  addTitle( "Economic Update" ) %>% #set the main title
+  addSubtitle(format(date)) #set the sub-title
+
+# slide2: Use of Slides ------------------
+options( "ReporteRs-fontsize" = 26 )
+texts = c( "These slides provide history and forecast for key economic indicators..", 
+           "This is for presentation purposes only.")
+
+mydoc <- mydoc %>% 
+  addSlide( slide.layout = "Title and Content" ) %>% 
+  addTitle( "Use of Slides" ) %>% 
+  addParagraph( value = texts  ) 
+
+# slide3: Placeholder Summary ------------------
+mydoc <- mydoc %>% 
+  addSlide( slide.layout = "Title and Content" ) %>% 
+  addTitle( "Economic Summary" ) %>% 
+  addParagraph( value = texts  ) 
+
+
+# slide4: Economic Indidicators ------------------
+mydoc <- mydoc %>% 
+  addSlide( slide.layout = "Title and Content" ) %>% 
+  addTitle( "Economic Indicators" ) %>% 
+  addPlot( function( ) print( multiplot(gdp_plot, houst_plot, fx_plot, cpi_plot, cols=2) )) %>%  
+  addFooter("Source: Federal Bank Reserve St. Louis")
+
+
+writeDoc( mydoc, file = 'C:/Users/Jeff/Desktop/ppt_auto/econ_update.pptx' )
+
+
+library(RDCOMClient)
+
+OutApp <- COMCreate("Outlook.Application")
+outMail = OutApp$CreateItem(0)
+outMail[["BCC"]] = 'questions@drunkstatistician.com'
+outMail[["subject"]] = "Economic Update"
+outMail[["body"]] = "Colleagues, Please find attached the latest Economic Market Update"
+outMail[["Attachments"]]$Add('C:/Users/Jeff/Desktop/ppt_auto/econ_update.pptx')
+## send it                     
+outMail$Send()
